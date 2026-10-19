@@ -1,0 +1,17 @@
+﻿.inputField {
+    margin-bottom: 20px;
+    display: flex;
+}
+
+.unity-integer-field__input {
+    background-color: rgb(255, 255, 250);
+    border-radius: 8px;
+    height: 80px;
+    min-width: 100px;
+    font-size: 40px;
+}
+
+.unity-integer-field__label {
+    font-size: 40px;
+    flex-grow: 1;
+}
