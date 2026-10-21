@@ -8,23 +8,23 @@
     <Style src="UIController.uss" />
     <ui:Template src="/Assets/UI/InputField/InputFieldTemplate.uxml" name="InputField"/>
     <ui:VisualElement>
-        <ui:Label text="Score:" name="score" class="score" />
+        <ui:Label text="Score: 0" name="score" class="score" />
     </ui:VisualElement>
     <ui:VisualElement name="fields" class="fields">
-        <ui:Instance template="InputField" name="diceCount">
+        <ui:Instance template="InputField" name="diceCountField">
             <ui:AttributeOverrides element-name="inputField" label="Dice count" />
         </ui:Instance>
-        <ui:Instance template="InputField" name="drawPoints">
+        <ui:Instance template="InputField" name="drawValueField">
             <ui:AttributeOverrides element-name="inputField" label="Draw points" />
         </ui:Instance>
-        <ui:Instance template="InputField" name="failPoints">
+        <ui:Instance template="InputField" name="failValueField">
             <ui:AttributeOverrides element-name="inputField" label="Fail points" />
         </ui:Instance>
-        <ui:Instance template="InputField" name="successPoints">
+        <ui:Instance template="InputField" name="victoryValueField">
             <ui:AttributeOverrides element-name="inputField" label="Success points" />
         </ui:Instance>
     </ui:VisualElement>
-    <ui:VisualElement name="rollButton" class="rollButtonContainer">
-        <ui:Button name="button" class="rollButton" text="Roll dices" />
+    <ui:VisualElement class="rollButtonContainer">
+        <ui:Button name="rollButton" class="rollButton" text="Roll dices" />
     </ui:VisualElement>
 </ui:UXML>

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class RollButton : MonoBehaviour
 {
@@ -9,40 +9,48 @@ public class RollButton : MonoBehaviour
     
     private Button button;
     
+    private UIDocument uiDocument;
+    private VisualElement root;
+    
     private void Awake()
     {
-        button = GetComponent<Button>();
-        button.onClick.AddListener(HandleClick);
-    }
-    
-    private void Update()
-    {
-        if (!button.interactable) return;
-        if (Keyboard.current == null) return;
-
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            EmitEvent();
-        }
+        uiDocument = GetComponent<UIDocument>();
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
-        button.onClick.RemoveListener(HandleClick);
+        root = uiDocument.rootVisualElement;
+        button = root.Q<Button>("rollButton");
+        
+        button.clicked += HandleClick;
+        root.RegisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
+        root.focusable = true;
+        root.Focus();
+    }
+
+    private void OnDisable()
+    {
+        if (button != null)
+            button.clicked -= HandleClick;
+
+        root?.UnregisterCallback<KeyDownEvent>(OnKeyDown, TrickleDown.TrickleDown);
     }
     
     public void AddListener(UnityAction action) => onRollRequested.AddListener(action);
     public void RemoveListener(UnityAction action) => onRollRequested.RemoveListener(action);
     
-    public void SetInteractable(bool value)
+    private void OnKeyDown(KeyDownEvent evt)
     {
-        button.interactable = value;
+        if (evt.keyCode != KeyCode.Space) return;
+        if (button is not { enabledSelf: true }) return;
+
+        EmitEvent();
+        evt.StopPropagation();
     }
 
     private void HandleClick()
     {
-        if (!button.interactable) return;
-        
+        if (button is not { enabledSelf: true }) return;
         EmitEvent();
     }
 

@@ -6,34 +6,57 @@ using UnityEngine;
 public class DiceController : MonoBehaviour
 {
     [SerializeField] private Dice dicePrefab;
-    [SerializeField] private int diceCount = 2;
-    [SerializeField] private RollButton rollButton;
-    [SerializeField] private Counter score;
+    [SerializeField] private UIController uiController;
+    
+    private int diceCount = 2;
+    private int drawValue = 0;
+    private int failValue = 0;
+    private int successValue = 0;
 
     private int throwForce = 3;
     private int upwardBias = 2;
     private int torqueForce = 4;
 
-    private readonly List<Dice> dice = new ();
+    private readonly List<Dice> dices = new ();
     private bool isRolling;
 
     private void Awake()
     {
-        for (var i = 0; i < diceCount; i++)
-        {
-            var angle = i * Mathf.PI * 2 / diceCount;
-            var offset = new Vector3(Mathf.Cos(angle), 1, Mathf.Sin(angle)) * 2;
-
-            var d = Instantiate(dicePrefab, transform.position + offset, Random.rotation, transform);
-            dice.Add(d);
-        }
-
-        rollButton.AddListener(StartRoll);
+        uiController.AddFieldValuesListener(SetParams);
+        uiController.AddRollListener(StartRoll);
     }
 
     private void OnDestroy()
     {
-        rollButton.RemoveListener(StartRoll);
+        uiController.RemoveRollListener(StartRoll);
+        uiController.RemoveFieldValuesListener(SetParams);
+    }
+    
+    private void SyncDiceCount()
+    {
+        while (dices.Count < diceCount)
+        {
+            var angle = dices.Count * Mathf.PI * 2 / diceCount;
+            var offset = new Vector3(Mathf.Cos(angle), 1f, Mathf.Sin(angle)) * 2f;
+
+            var d = Instantiate(dicePrefab, transform.position + offset, Random.rotation, transform);
+            dices.Add(d);
+        }
+
+        while (dices.Count > diceCount)
+        {
+            var last = dices.Count - 1;
+            Destroy(dices[last].gameObject);
+            dices.RemoveAt(last);
+        }
+    }
+
+    private void SetParams(Dictionary<string, int> parameters)
+    {
+        diceCount = Mathf.Max(1, parameters["diceCount"]);
+        drawValue = parameters["drawValue"];
+        failValue = parameters["failValue"];
+        successValue = parameters["successValue"];
     }
 
     private void StartRoll()
@@ -45,9 +68,11 @@ public class DiceController : MonoBehaviour
     private IEnumerator RollRoutine()
     {
         isRolling = true;
-        rollButton.SetInteractable(false);
+        uiController.SetControlsInteractable(false);
 
-        foreach (var d in dice)
+        SyncDiceCount();
+
+        foreach (var d in dices)
         {
             d.ResetToStart();
 
@@ -61,15 +86,15 @@ public class DiceController : MonoBehaviour
 
         yield return new WaitUntil(AllDiceStopped);
 
-        var sum = dice.Sum(d => d.LastValue);
-        score.SetScore(sum);
+        var sum = dices.Sum(d => d.LastValue);
+        uiController.SetScore(sum);
 
         isRolling = false;
-        rollButton.SetInteractable(true);
+        uiController.SetControlsInteractable(true);
     }
 
     private bool AllDiceStopped()
     {
-        return dice.All(d => !d.IsRolling);
+        return dices.All(d => !d.IsRolling);
     }
 }
