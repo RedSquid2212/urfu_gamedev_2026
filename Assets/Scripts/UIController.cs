@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 public class UIController : MonoBehaviour
@@ -9,6 +10,7 @@ public class UIController : MonoBehaviour
     private VisualElement root;
     
     private Label scoreLabel;
+    private Label resultLabel;
 
     private IntegerField diceCountField;
     private IntegerField drawValueField;
@@ -30,6 +32,7 @@ public class UIController : MonoBehaviour
         root = uiDocument.rootVisualElement;
         
         scoreLabel = root.Q<Label>("score");
+        resultLabel = root.Q<Label>("result");
 
         diceCountField = root.Q<TemplateContainer>("diceCountField").Q<IntegerField>();
         drawValueField = root.Q<TemplateContainer>("drawValueField").Q<IntegerField>();
@@ -45,6 +48,17 @@ public class UIController : MonoBehaviour
         if (rollButton != null)
             rollButton.clicked -= HandleClick;
     }
+    
+    private void Update()
+    {
+        if (Keyboard.current == null) return;
+        if (!Keyboard.current.spaceKey.wasPressedThisFrame) return;
+
+        if (rollButton is not { enabledSelf: true }) return;
+
+        EmitFieldValues();
+        EmitRollEvent();
+    }
 
     public void AddRollListener(UnityAction action) => onRollRequested.AddListener(action);
     public void RemoveRollListener(UnityAction action) => onRollRequested.RemoveListener(action);
@@ -57,6 +71,13 @@ public class UIController : MonoBehaviour
     public void SetScore(int score)
     {
         scoreLabel.text = $"Score: {score}";
+    }
+
+    public void SetResult(string text, string ussColorClass)
+    {
+        resultLabel.ClearClassList();
+        resultLabel.text = text;
+        resultLabel.AddToClassList(ussColorClass);
     }
 
     public void SetControlsInteractable(bool value)
@@ -84,10 +105,10 @@ public class UIController : MonoBehaviour
     {
         var values = new Dictionary<string, int>
             { 
-                { "diceCount", diceCountField?.value ?? 0 },
-                { "drawValue", drawValueField?.value ?? 0 },
-                { "failValue", failValueField?.value ?? 0 },
-                { "successValue", victoryValueField?.value ?? 0 }
+                { "diceCount", diceCountField?.value ?? 1 },
+                { "drawValue", drawValueField?.value ?? 1 },
+                { "failValue", failValueField?.value ?? 1 },
+                { "successValue", victoryValueField?.value ?? 1 }
             };
         
         onFieldValuesEmitted.Invoke(values);

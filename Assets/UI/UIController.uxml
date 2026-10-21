@@ -7,8 +7,9 @@
 >
     <Style src="UIController.uss" />
     <ui:Template src="/Assets/UI/InputField/InputFieldTemplate.uxml" name="InputField"/>
-    <ui:VisualElement>
+    <ui:VisualElement class="labels">
         <ui:Label text="Score: 0" name="score" class="score" />
+        <ui:Label text="In progress" name="result" class="hidden"/>
     </ui:VisualElement>
     <ui:VisualElement name="fields" class="fields">
         <ui:Instance template="InputField" name="diceCountField">

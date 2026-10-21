@@ -2,6 +2,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="InputFieldTemplate.uss" />
     <ui:VisualElement class="inputField">
-        <ui:IntegerField name="inputField" label="Some label" class="integerField" />
+        <ui:IntegerField name="inputField" label="Some label" class="integerField" value="1" />
     </ui:VisualElement>
 </ui:UXML>

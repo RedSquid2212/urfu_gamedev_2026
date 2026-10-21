@@ -9,9 +9,9 @@ public class DiceController : MonoBehaviour
     [SerializeField] private UIController uiController;
     
     private int diceCount = 2;
-    private int drawValue = 0;
-    private int failValue = 0;
-    private int successValue = 0;
+    private int drawValue = 1;
+    private int failValue = 1;
+    private int successValue = 1;
 
     private int throwForce = 3;
     private int upwardBias = 2;
@@ -39,8 +39,8 @@ public class DiceController : MonoBehaviour
             var angle = dices.Count * Mathf.PI * 2 / diceCount;
             var offset = new Vector3(Mathf.Cos(angle), 1f, Mathf.Sin(angle)) * 2f;
 
-            var d = Instantiate(dicePrefab, transform.position + offset, Random.rotation, transform);
-            dices.Add(d);
+            var dice = Instantiate(dicePrefab, transform.position + offset, Random.rotation, transform);
+            dices.Add(dice);
         }
 
         while (dices.Count > diceCount)
@@ -72,29 +72,47 @@ public class DiceController : MonoBehaviour
 
         SyncDiceCount();
 
-        foreach (var d in dices)
+        foreach (var dice in dices)
         {
-            d.ResetToStart();
+            dice.ResetToStart();
 
             var force = new Vector3(
                 Random.Range(-1, 1),
                 upwardBias,
                 Random.Range(-1, 1)).normalized * throwForce;
 
-            d.Throw(force, Random.insideUnitSphere * torqueForce);
+            dice.Throw(force, Random.insideUnitSphere * torqueForce);
         }
 
         yield return new WaitUntil(AllDiceStopped);
 
         var sum = dices.Sum(d => d.LastValue);
         uiController.SetScore(sum);
+        ComputeResult(sum);
 
         isRolling = false;
         uiController.SetControlsInteractable(true);
     }
 
+    private void ComputeResult(int sum)
+    {
+        var resultText = sum >= successValue ?
+            "Success" :
+            (drawValue <= sum && sum < successValue) ?
+                "Draw" : (failValue <= sum && sum < drawValue) ? "Fail" : "Epic fail";
+        
+        var resultColorClass = resultText switch
+        {
+            "Success" => "success",
+            "Draw" => "draw",
+            _ => "fail"
+        };
+        
+        uiController.SetResult(resultText, resultColorClass);
+    }
+
     private bool AllDiceStopped()
     {
-        return dices.All(d => !d.IsRolling);
+        return dices.All(dice => !dice.IsRolling);
     }
 }

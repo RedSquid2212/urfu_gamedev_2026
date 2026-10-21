@@ -1,8 +1,26 @@
-﻿.score {
+﻿.labels {
     font-size: 60px;
-    position: relative;
-    top: 20px;
-    left: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.fail {
+    color: red;
+}
+
+.success {
+    color: green;
+}
+
+.draw {
+    color: yellow;
 }
 
 .fields {
